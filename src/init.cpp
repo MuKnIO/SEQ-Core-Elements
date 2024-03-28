@@ -1334,7 +1334,7 @@ bool AppInitMain(NodeContext& node, interfaces::BlockAndHeaderTipInfo* tip_info)
         std::string file_path = gArgs.GetArg("-exchangeratesconf", "");
         if (!file_path.empty()) {
             std::string error;
-            if (!LoadExchangeRatesFromConfigFile(file_path, error)) {
+            if (!LoadExchangeRatesFromJSONFile(file_path, error)) {
                 return InitError(strprintf(_("Unable to load exchange rates from config file %s: %s"), file_path, error));
             };
         } else {
