@@ -13,7 +13,7 @@
 std::map<CAsset, CAssetExchangeRate> g_exchange_rate_map = {};
 
 CAmount CalculateExchangeValue(const CAmount& amount, const CAsset& asset) {
-    auto it = g_exchange_rate_map.find(asset); 
+    auto it = g_exchange_rate_map.find(asset);
     if (it == g_exchange_rate_map.end()) {
         return 0;
     }
@@ -32,7 +32,7 @@ bool LoadExchangeRatesFromJSONFile(std::string file_path, std::string& error)
     // Read config file
     std::ifstream ifs(file_path);
     if (!ifs.is_open()) {
-        error = strprintf("Failed to open file: %s", file_path);
+        error = "Failed to open file";
         return false;
     }
     std::stringstream buffer;
@@ -63,7 +63,7 @@ bool LoadExchangeRatesFromJSONFile(std::string file_path, std::string& error)
         } else if (assetData.isObject()) {
             std::map<std::string, UniValue> assetFields;
             assetData.getObjMap(assetFields);
-            CAmount exchangeRateValue = assetFields["value"].get_int();
+            exchangeRateValue = assetFields["value"].get_int();
         } else {
             error = strprintf("Invalid value for asset %s: %d", assetIdentifier, assetData.getValStr());
             return false;
