@@ -51,22 +51,22 @@ All this being said, Elements enforces that transaction fees are paid in what it
 
 No structural changes to the transaction model will need to be made since Elements already requires fees to be explicitly specified as a transaction output. And since the output already has an asset field, it will just be a matter of softcoding its value rather than defaulting to the chain’s native asset.
 
-The hardcoding of the fee asset can be found here: https://github.com/ElementsProject/elements/blob/2d298f7e3f76bc6c19d9550af4fd1ef48cf0b2a6/src/rpc/rawtransaction_util.cpp#L295-L297
+The hardcoding of the fee asset can be found in [src/rpc/rawtransaction_util.cpp#L295-L297](https://github.com/ElementsProject/elements/blob/2d298f7e3f76bc6c19d9550af4fd1ef48cf0b2a6/src/rpc/rawtransaction_util.cpp#L295-L297).
 
-To softcode it, we will need to make changes to the fee output parser found here:
-https://github.com/ElementsProject/elements/blob/2d298f7e3f76bc6c19d9550af4fd1ef48cf0b2a6/src/rpc/rawtransaction_util.cpp#L321-L327
+To softcode it, we will need to make changes to the fee output parser found in [src/rpc/rawtransaction_util.cpp#L321-L327](
+https://github.com/ElementsProject/elements/blob/2d298f7e3f76bc6c19d9550af4fd1ef48cf0b2a6/).
 
 ### Mempool
 
 There are both structural and behavioral changes that need to be made to the mempool in order for transactions to be correctly valuated in the presence of transactions paid with different assets.
 
-Just as with transaction construction described before, the mempool must use the softcoded asset specified in the fee output rather than the chain's hardcoded native asset. The hardcoding of the fee asset can be found here: https://github.com/ElementsProject/elements/blob/2d298f7e3f76bc6c19d9550af4fd1ef48cf0b2a6/src/validation.cpp#L885-L886
+Just as with transaction construction described before, the mempool must use the softcoded asset specified in the fee output rather than the chain's hardcoded native asset. The hardcoding of the fee asset can be found in [src/validation.cpp#L885-L886](https://github.com/ElementsProject/elements/blob/2d298f7e3f76bc6c19d9550af4fd1ef48cf0b2a6/src/validation.cpp#L885-L886).
 
-It also must separate the fee value from the fee amount. This is where structural changes are required. The `CtxMemPoolEntry` class requires two additional fields[^2] `nFeeAsset` and `nFeeAmount` to be added here: https://github.com/ElementsProject/elements/blob/2d298f7e3f76bc6c19d9550af4fd1ef48cf0b2a6/src/txmempool.h#L98
+It also must separate the fee value from the fee amount. This is where structural changes are required. The `CtxMemPoolEntry` class requires two additional fields[^2] `nFeeAsset` and `nFeeAmount` to be added after [src/txmempool.h#L98](https://github.com/ElementsProject/elements/blob/2d298f7e3f76bc6c19d9550af4fd1ef48cf0b2a6/src/txmempool.h#L98).
 
 `nFeeAsset` is the asset used to pay the transaction fees, and `nFeeAmount` is the amount paid in said asset. `nFee` is insufficient on its own because it needs to be updated whenever the exchange rates change using the `setfeeexchangerates` RPC. When this happens, the fees of all transactions currently in the mempool must be recomputed. Since transactions can sit in a mempool indefinitely, it's important that transactions with depreciated fee assets are evicted. Likewise, transactions with appreciating fee assets should be bumped in priority in order to maximize the value of fee rewards to block proposers.
 
-Recomputing fees is non-trivial because transactions are weighted by not only their own value but also by their ancestors and descendents. Fortunately, there is a similar functionality already in place for prioritizing transactions based on off-chain payments, so the solution will end up looking very similar to the `CtxMemPool:PrioritiseTransaction` method defined here: https://github.com/ElementsProject/elements/blob/2d298f7e3f76bc6c19d9550af4fd1ef48cf0b2a6/src/txmempool.cpp#L1003-L1031
+Recomputing fees is non-trivial because transactions are weighted by not only their own value but also by their ancestors and descendents. Fortunately, there is a similar functionality already in place for prioritizing transactions based on off-chain payments, so the solution will end up looking very similar to the `CtxMemPool:PrioritiseTransaction` method defined at [src/txmempool.cpp#L1003-L1031](https://github.com/ElementsProject/elements/blob/2d298f7e3f76bc6c19d9550af4fd1ef48cf0b2a6/src/txmempool.cpp#L1003-L1031).
 
 [^2]: In `CtxMempoolEntry`, the fee asset and amount can be retrieved from the transaction reference, so both of these values are effectively a cache to avoid expensive parent transaction lookups. The performance impact has not been measured, but since Bitcoin and Elements both cache `nFee`, it seemed rational to follow suit and cache these values as well.
 
