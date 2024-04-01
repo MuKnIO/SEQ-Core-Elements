@@ -25,7 +25,7 @@ Node operators will be able to assign weight values to issued assets on the netw
 
 To assist wallets with fee asset selection, nodes will expose their current valuations with a new RPC named `getfeeexchangerates`. The input of `setfeeexchangerates` and the output of `getfeeexchangerates` will both have the same schema. Additionally, node operators will be able to statically configure their exchange rates using a JSON config file which also will use the same schema.
 
-For the initial prototype, the schema will simply be a key value map, where the keys are the asset identifiers and the values are the weight value. An asset identifier can either be the hex id or a label specified by the user using Element's `assetdir` parameter. The weight value is a 64-bit integer[^1] that will be scaled by a factor of 1 billion to increase precision when computing fee values.
+For the initial prototype, the schema will simply be a key value map, where the keys are the asset identifiers and the values are the weight value. An asset identifier can either be the hex id or a label specified by the user using Element's `assetdir` parameter. The weight value is a 64-bit integer[^1] that will be scaled by a factor of one billion to enable high precision without resorting to floating point numbers.
 
 Example:
 
