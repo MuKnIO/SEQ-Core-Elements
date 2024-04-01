@@ -45,7 +45,7 @@ The No Coin feature will be implemented as an extension to the Elements blockcha
 
 Elements also uses a federation of block signers as a low-cost alternative to proof-of-work mining process. This interacts positively with No Coin since it increases the predictability of whether a transaction will be accepted in a given block. Wallets can use the block signer's published exchange rates to perform fee estimations, and can infer the schedule of block proposers based on the deterministic round robin algorithm used to select the next proposer.
 
-All this being said, Elements enforces that transaction fees are paid in what is refers to as the policy asset, which in most cases is a pegged Bitcoin asset. Consequently, No Coins requires that this restriction be removed, which will require a number of changes to the core code.
+All this being said, Elements enforces that transaction fees are paid in what it refers to as the policy asset, which in most cases is a pegged Bitcoin asset. Consequently, No Coins requires that this restriction be removed, which will require a number of changes to the core code.
 
 ### Transaction
 
@@ -66,17 +66,20 @@ It also must separate the fee value from the fee amount. This is where structura
 
 `nFeeAsset` is the asset used to pay the transaction fees, and `nFeeAmount` is the amount paid in said asset. `nFee` is insufficient on its own because it needs to be updated whenever the exchange rates change using the `setfeeexchangerates` RPC. When this happens, the fees of all transactions currently in the mempool must be recomputed. Since transactions can sit in a mempool indefinitely, it's important that transactions with depreciated fee assets are evicted. Likewise, transactions with appreciating fee assets should be bumped in priority in order to maximize the value of fee rewards to block proposers.
 
-Recomputing fees is fairly complicated because transactions are valuated not only based on their own value but also by their ancestors and descendents. Fortunately, there is a similar functionality already in place for prioritizing transactions based on off-chain payments, so the solution will end up looking very similar to the `CtxMemPool:PrioritiseTransaction` method defined here: https://github.com/ElementsProject/elements/blob/2d298f7e3f76bc6c19d9550af4fd1ef48cf0b2a6/src/txmempool.cpp#L1003-L1031
+Recomputing fees is non-trivial because transactions are weighted by not only their own value but also by their ancestors and descendents. Fortunately, there is a similar functionality already in place for prioritizing transactions based on off-chain payments, so the solution will end up looking very similar to the `CtxMemPool:PrioritiseTransaction` method defined here: https://github.com/ElementsProject/elements/blob/2d298f7e3f76bc6c19d9550af4fd1ef48cf0b2a6/src/txmempool.cpp#L1003-L1031
 
 [^2]: In `CtxMempoolEntry`, the fee asset and amount can be retrieved from the transaction reference, so both of these values are effectively a cache to avoid expensive parent transaction lookups. The performance impact has not been measured, but since Bitcoin and Elements both cache `nFee`, it seemed rational to follow suit and cache these values as well.
 
 ### Value fixer / Price server
 
-### Chain parameters
+### RPCs
+
 
 ## Examples
 
 ## Appendix
+
+### Chain parameters
 
 ### Bootstrapping
 
