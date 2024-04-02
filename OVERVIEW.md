@@ -70,10 +70,19 @@ Recomputing fees is non-trivial because transactions are weighted by not only th
 
 [^2]: In `CtxMempoolEntry`, the fee asset and amount can be retrieved from the transaction reference, so both of these values are effectively a cache to avoid expensive parent transaction lookups. The performance impact has not been measured, but since Bitcoin and Elements both cache `nFee`, it seemed rational to follow suit and cache these values as well.
 
-### Value fixer / Price server
+## Exchange rate map
+
+### Price server
+
+In the simplest case, a block signer can maintain a static mapping of assets to exchange rate values which they configure when setting up their node and never change after. Perhaps they might want to add a few assets as they become available, which they can do by editing their JSON config file and restarting their node, but otherwise leave it the same.
+
+As the value of the network grows, however, block signers will want to be able to update this exchange rate map dynamically and automatically. Thus the need for a price feed, an external service which queries one or many exchanges to find the current market value of a given asset, and then feeds this value to the node via the aforementioned `setfeeexchangerates` RPC.
+
+Being an external service and not integrated into the node, the pricing algorithm can be as simple or as complicated as node operators desire. To start, it may just compute the median of the exchange values over a certain interval of time. In the future, it might store historical data and use it to compute volatility and liquidity.
+
+Sequentia will provide a price server as an example and baseline for node operators to extend as needed. The complexity of the pricing algorithm will scale with the activity of the network, and so our initial goals are for it to be simple and understandable for the most common use case.
 
 ### RPCs
-
 
 ## Examples
 
