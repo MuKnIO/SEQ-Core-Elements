@@ -72,16 +72,23 @@ Recomputing fees is non-trivial because transactions are weighted by not only th
 
 ### Price server
 
-In the simplest case, a block signer can maintain a static mapping of assets to exchange rate values which they configure when setting up their node and never change after. Perhaps they might want to add a few assets as they become available, which they can do by editing their JSON config file and restarting their node, but otherwise leave it the same.
+In the simplest case, a block signer can statically configure their node with an exchange rate map which never changes. This would require no external program, just a single JSON file as described in the specification.
 
-As the value of the network grows, however, block signers will want to be able to update this exchange rate map dynamically and automatically. Thus the need for a price feed, an external service which queries one or many exchanges to find the current market value of a given asset, and then feeds this value to the node via the aforementioned `setfeeexchangerates` RPC.
+As the value of the network grows, however, block signers will want to dynamically change update these exchange rates. Thus the need for a price server: an external service which queries one or many exchanges to find the current market value of a given asset, and then feeds this value to the node via the aforementioned `setfeeexchangerates` RPC.
 
-Being an external service and not integrated into the node, the pricing algorithm can be as simple or as complicated as node operators desire. To start, it may just compute the median of the exchange values over a certain interval of time. In the future, it might store historical data and use it to compute volatility and liquidity.
+Being an external service and not integrated into the node, the pricing algorithm can be as simple or as complicated as needed. A simple algorithm may just compute the median of the exchange values over a certain interval of time. A more advanced algorithm might store historical data and use it to compute volatility and liquidity.
 
-Sequentia will provide a price server as an example and baseline for node operators to extend as needed. The complexity of the pricing algorithm will scale with the activity of the network, and so our initial goals are for it to be simple and understandable for the most common use case.
+The utility of a price server is not limited to block signers. Even though they are the only participants that collect fees, every node on the network will maintain its own mempool, and therefore will need to perform some sort of asset valuation in order to make meaningful decisions about which transctions to add to it.
+
+One solution is for nodes to simply ask the block signers what their exchange rates are. Since `getfeeexchangerates` will be an open endpoint, and block proposers are selected deterministically, the price server can simply query the next block proposer for its exchange rates. With this setup, the node's mempool will represent not the transactions it deems most valuable, but rather, the transactions that are most likely to end up in the next block, thereby benefitting the network by broadcasting transactions that are most relevant to it.
+
+Alternatively, a node operator may choose to set up its own exchange rate map in the same way that a block signer would. I.e., with a static config file or a price server.
+
+The objective here is not to prescribe a single solution for all use cases, but to demonstrate the range of possibilities enabled by this setup. For the testnet launch, Sequentia will implement a minimal price server to use as an example and baseline, optimizing for simplicity and extensibility.
 
 ### Exchange rate RPCs
 
+TODO
 
 ### Changes to existing RPCs
 
@@ -103,9 +110,12 @@ And in the latter:
 | -------- | ---- | ------- |
 | `wallet` | `gettransaction` | Add a `fee_asset` field in the result, and in each of the details |
 | `wallet` | `listtransactions` | In each of the returned transactions, add a `fee_asset` field |
-...
+
+TODO: Add remaining RPCs
 
 ## Examples
+
+TODO: Embed video demo?
 
 ## Appendix
 
