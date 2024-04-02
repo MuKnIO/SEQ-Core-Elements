@@ -70,8 +70,6 @@ Recomputing fees is non-trivial because transactions are weighted by not only th
 
 [^2]: In `CtxMempoolEntry`, the fee asset and amount can be retrieved from the transaction reference, so both of these values are effectively a cache to avoid expensive parent transaction lookups. The performance impact has not been measured, but since Bitcoin and Elements both cache `nFee`, it seemed rational to follow suit and cache these values as well.
 
-## Exchange rate map
-
 ### Price server
 
 In the simplest case, a block signer can maintain a static mapping of assets to exchange rate values which they configure when setting up their node and never change after. Perhaps they might want to add a few assets as they become available, which they can do by editing their JSON config file and restarting their node, but otherwise leave it the same.
@@ -82,7 +80,30 @@ Being an external service and not integrated into the node, the pricing algorith
 
 Sequentia will provide a price server as an example and baseline for node operators to extend as needed. The complexity of the pricing algorithm will scale with the activity of the network, and so our initial goals are for it to be simple and understandable for the most common use case.
 
-### RPCs
+### Exchange rate RPCs
+
+
+### Changes to existing RPCs
+
+Of course, none of these features are meaningful without being exposed in some way to network participants. To that end, we will be extending the existing RPCs to enable specifying which asset fees are paid with, and change defaults to be consistent with this new capability.
+
+Broadly speaking, there are two categories of RPCs that need to be changed: RPCs which create and/or modify transaction fees, and read-only RPCs that provide information about those fees. The former represent the bulk of the work, and the latter should be comparatively straightforward as it will just be a matter of plucking new information from existing data.
+
+In the former category are:
+
+| Category | Name | Changes |
+| -------- | ---- | ------- |
+| `rawtransactions` | `createrawtransaction` | Add `fee_asset` field to specify the asset used for fee payment |
+| `rawtransactions` | `fundrawtransaction` | Add `fee_asset` field to specify the asset used for fee payment |
+| `wallet` | `sendtoaddress` | Add `fee_asset` field to specify the asset used for fee payment, otherwise default to the asset being sent in the transaction |
+
+And in the latter:
+
+| Category | Name | Changes |
+| -------- | ---- | ------- |
+| `wallet` | `gettransaction` | Add a `fee_asset` field in the result, and in each of the details |
+| `wallet` | `listtransactions` | In each of the returned transactions, add a `fee_asset` field |
+...
 
 ## Examples
 
