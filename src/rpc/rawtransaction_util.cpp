@@ -322,6 +322,11 @@ CMutableTransaction ConstructTransaction(const UniValue& inputs_in, const UniVal
                 // ELEMENTS: explicit fee outputs
                 CAmount nAmount = AmountFromValue(output[name_]);
                 out.nValue = nAmount;
+                
+                // SEQUENTIA: Allow fees in any asset
+                if (g_con_sequentiamode && output.exists("fee_asset")) {
+                    out.nAsset = CAsset(ParseHashO(output, "fee_asset"));
+                }
                 out.scriptPubKey = CScript();
                 is_fee = true;
                 break;
