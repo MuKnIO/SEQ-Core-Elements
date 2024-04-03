@@ -120,15 +120,15 @@ And the latter:
 | `blockchain` | `getblock` | Add a `fee_details` field that is a breakdown of fees per fee asset (map from fee_asset tag to fee_amount CAmount, e.g. `{"wbtc":"123","wusd":"456"}`, except with nAsset tags rather than symbolic names) | 
 | `blockchain` | `getblockstats` | Make all the sums, totals, averages, etc., denominated in fee value unit, and only available if the rates have been recorded or otherwise provided. For totals, add a field `fee_details` with breakdown per fee asset. |
 | `blockchain` | `getmempoolinfo` | The `total_fee`, `mempoolinfee`, `minrelaytxfee` fields will be denominated in the implicit fee value unit as defined by the node's current exchange rates. | 
-| `blockchain` | `getmempoolancestors` | TODO | 
-| `blockchain` | `getmempooldescendents` | TODO | 
-| `blockchain` | `getmempoolentry` | TODO | 
-| `blockchain` | `getrawmempool` | TODO |
-| `blockchain` | `savemempool` | TODO | 
-| `blockchain` | `gettxoutsetinfo` | TODO | 
+| `blockchain` | `getmempoolancestors` | The `fees` sub-element needs an additional `fee_asset` field | 
+| `blockchain` | `getmempooldescendents` | The `fees` sub-element needs an additional `fee_asset` field | 
+| `blockchain` | `getmempoolentry` | The `fees` sub-element needs an additional `fee_asset` field | 
+| `blockchain` | `getrawmempool` | The `fees` sub-element needs an additional `fee_asset` field |
+| `blockchain` | `savemempool` | The `fees` sub-element needs an additional `fee_asset` field | 
+| `blockchain` | `gettxoutsetinfo` | Add field `unclaimed_rewards_details` with a breakdown by fee asset | 
 | `mining` | `getblocktemplate` | TODO | 
 | `mining` | `prioritisetransaction` | TODO | 
-| `network` | `getnetworkinfo` | TODO | 
+| `network` | `getnetwonrkinfo` | TODO | 
 | `network` | `getpeerinfo` | TODO | 
 | `rawtransactions` | `analyzepsbt` | TODO | 
 | `rawtransactions` | `decodepsbt` | TODO | 
