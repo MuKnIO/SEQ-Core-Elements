@@ -101,9 +101,9 @@ $ sequentia-cli getfeeexchangerates
 
 Of course, none of these features are meaningful without being exposed in some way to network participants. To that end, we will be extending the existing RPCs to enable specifying which asset fees are paid with, and change defaults to be consistent with this new capability.
 
-Broadly speaking, there are two categories of RPCs that need to be changed: RPCs which create and/or modify transaction fees, and read-only RPCs that provide information about those fees. The RPCs will be separated to make it clear that while there is indeed a ripple effect on many RPCs, it is indeed a very small stone being added to the core protocol.
+Broadly speaking, there are two categories of RPCs that need to be changed: RPCs which create and/or modify transaction fees, and read-only RPCs that provide information about those fees.
 
-The former include:
+The former category includes:
 
 | Category | Name | Changes |
 | -------- | ---- | ------- |
