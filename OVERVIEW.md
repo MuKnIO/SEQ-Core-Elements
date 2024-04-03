@@ -78,9 +78,14 @@ The objective here is not to prescribe a single solution for all use cases, but 
 
 ### Exchange rate RPCs
 
-In simplest terms, the exchange RPCs provide a read and write interface to the node's exchange rate map. `getfeeexchangerates` returns the entire exchange rate map, and `setfeeeexchangerates` overrides the current exchange rate map with whatever is provided as its inputs. Note that there is no union between the old and new exchange rate map: the new map completely overrides the current.
+The exchange RPCs will provide a read and write interface to the node's exchange rate map used for comparing fees. `getfeeexchangerates` returns the entire exchange rate map, and `setfeeeexchangerates` overrides the current exchange rate map with whatever is provided as its inputs. Note that there is no union between the old and new exchange rate map: the new map completely overrides the current.
 
-Example usage with the same data as the config file shown previously:
+| Category | Name | Changes |
+| -------- | ---- | ------- |
+| `exchangerates` | `getfeeexchangerates` | Returns the node's exchange rate map of assets to reference weight values |
+| `exchangerates` | `setfeeexchangerates` | Updates the nodes exchange rate map new mapping provided as input |
+
+Example usage, with the same data as the config file shown previously:
 ```bash
 $ sequentia-cli setfeeexchangerates '{ "S-BTC": 5, "USDt": 10, "33244cc19dd9df0fd901e27246e3413c8f6a560451e2f3721fb6f636791087c7": 3 }'
 
@@ -96,22 +101,48 @@ $ sequentia-cli getfeeexchangerates
 
 Of course, none of these features are meaningful without being exposed in some way to network participants. To that end, we will be extending the existing RPCs to enable specifying which asset fees are paid with, and change defaults to be consistent with this new capability.
 
-Broadly speaking, there are two categories of RPCs that need to be changed: RPCs which create and/or modify transaction fees, and read-only RPCs that provide information about those fees.
+Broadly speaking, there are two categories of RPCs that need to be changed: RPCs which create and/or modify transaction fees, and read-only RPCs that provide information about those fees. The RPCs will be separated to make it clear that while there is indeed a ripple effect on many RPCs, it is indeed a very small stone being added to the core protocol.
+
+The former include:
 
 | Category | Name | Changes |
 | -------- | ---- | ------- |
 | `rawtransactions` | `createrawtransaction` | Add `fee_asset` field to specify the asset used for fee payment |
 | `rawtransactions` | `fundrawtransaction` | Add `fee_asset` field to specify the asset used for fee payment |
 | `wallet` | `sendtoaddress` | Add `fee_asset` field to specify the asset used for fee payment, otherwise default to the asset being sent in the transaction |
+| `wallet` | `sendmany` | Add `fee_asset` field to specify the asset used for fee payment, otherwise default to the asset being sent in the transaction |
+| `wallet` | `settxfee` | Add optional “fee_asset” parameter, defaulting to the asset being sent in the transaction |
 
-And in the latter:
+And the latter:
 
 | Category | Name | Changes |
 | -------- | ---- | ------- |
+| `blockchain` | `getblock` | Add a `fee_details` field that is a breakdown of fees per fee asset (map from fee_asset tag to fee_amount CAmount, e.g. `{"wbtc":"123","wusd":"456"}`, except with nAsset tags rather than symbolic names) | 
+| `blockchain` | `getblockstats` | Make all the sums, totals, averages, etc., denominated in fee value unit, and only available if the rates have been recorded or otherwise provided. For totals, add a field `fee_details` with breakdown per fee asset. |
+| `blockchain` | `getmempoolinfo` | The `total_fee`, `mempoolinfee`, `minrelaytxfee` fields will be denominated in the implicit fee value unit as defined by the node's current exchange rates. | 
+| `blockchain` | `getmempoolancestors` | TODO | 
+| `blockchain` | `getmempooldescendents` | TODO | 
+| `blockchain` | `getmempoolentry` | TODO | 
+| `blockchain` | `getrawmempool` | TODO |
+| `blockchain` | `savemempool` | TODO | 
+| `blockchain` | `gettxoutsetinfo` | TODO | 
+| `mining` | `getblocktemplate` | TODO | 
+| `mining` | `prioritisetransaction` | TODO | 
+| `network` | `getnetworkinfo` | TODO | 
+| `network` | `getpeerinfo` | TODO | 
+| `rawtransactions` | `analyzepsbt` | TODO | 
+| `rawtransactions` | `decodepsbt` | TODO | 
+| `rawtransactions` | `testmempoolaccept` | TODO | 
+| `util` | `estimatesmartfee` | TODO | 
+| `wallet` | `bumpfee` | TODO | 
+| `wallet` | `psbtbumpfee` | TODO | 
+| `wallet` | `getbalances` | TODO | 
 | `wallet` | `gettransaction` | Add a `fee_asset` field in the result, and in each of the details |
+| `wallet` | `getwalletinfo` | TODO |
+| `wallet` | `listsinceblock` | In each of the returned transactions, add a `fee_asset` field |
 | `wallet` | `listtransactions` | In each of the returned transactions, add a `fee_asset` field |
-
-TODO: Add remaining RPCs
+| `wallet` | `listunspent` | TODO | 
+| `wallet` | `walletcreatefundedpsbt` | TODO | 
 
 ## Appendix
 
