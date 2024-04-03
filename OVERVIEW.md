@@ -128,21 +128,24 @@ And the latter:
 | `blockchain` | `gettxoutsetinfo` | Add field `unclaimed_rewards_details` with a breakdown by fee asset | 
 | `mining` | `getblocktemplate` | TODO | 
 | `mining` | `prioritisetransaction` | TODO | 
-| `network` | `getnetwonrkinfo` | TODO | 
 | `network` | `getpeerinfo` | TODO | 
 | `rawtransactions` | `analyzepsbt` | TODO | 
-| `rawtransactions` | `decodepsbt` | TODO | 
+| `rawtransactions` | `decodepsbt` | Add `fee_asset` field to specify the asset used for fee payment | 
 | `rawtransactions` | `testmempoolaccept` | TODO | 
 | `util` | `estimatesmartfee` | TODO | 
-| `wallet` | `bumpfee` | TODO | 
-| `wallet` | `psbtbumpfee` | TODO | 
-| `wallet` | `getbalances` | TODO | 
+| `wallet` | `bumpfee` | Add an options field for the `fee_asset`, defaulting to the same fee asset as the existing transaction, and return `fee_asset` field with the same value | 
+| `wallet` | `psbtbumpfee` | Add an options field for the `fee_asset`, defaulting to the same fee asset as the existing transaction, and return `fee_asset` field with the same value |  
 | `wallet` | `gettransaction` | Add a `fee_asset` field in the result, and in each of the details |
 | `wallet` | `getwalletinfo` | TODO |
 | `wallet` | `listsinceblock` | In each of the returned transactions, add a `fee_asset` field |
 | `wallet` | `listtransactions` | In each of the returned transactions, add a `fee_asset` field |
-| `wallet` | `listunspent` | TODO | 
 | `wallet` | `walletcreatefundedpsbt` | TODO | 
+
+There are also a few RPCs where only the documentation needs to be updated:
+
+| Category | Name | Changes |
+| `wallet` | `getbalances` | Document support for multiple assets |
+| `wallet` | `listunspent` | Declare `ancestorfees` as being in the node's fee value unit | 
 
 ## Appendix
 
