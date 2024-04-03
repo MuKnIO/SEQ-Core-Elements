@@ -83,7 +83,7 @@ The exchange RPCs will provide a read and write interface to the node's exchange
 | Category | Name | Changes |
 | -------- | ---- | ------- |
 | `exchangerates` | `getfeeexchangerates` | Returns the node's exchange rate map of assets to reference weight values |
-| `exchangerates` | `setfeeexchangerates` | Updates the nodes exchange rate map new mapping provided as input |
+| `exchangerates` | `setfeeexchangerates` | Updates the nodes exchange rate map with new mapping provided as input |
 
 Example usage, with the same data as the config file shown previously:
 ```bash
