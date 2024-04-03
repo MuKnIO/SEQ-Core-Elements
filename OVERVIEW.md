@@ -10,13 +10,6 @@ There should be no specific transaction fee currency on the sidechain. Thus, use
 
 In many blockchains, the requirement for users to have a “gas bank” in a native cryptocurrency (or peg) in order to transfer any other token creates barriers to entry and introduces frictions in user experience, preventing a broader network effect. In Sequentia, block proposers have incentives to accept any token as long as it has a recognized value and sufficient liquidity. They will retrieve and compare fee values by querying price data from CEXs or DEX oracles. If a transaction is taking too long to be included in a block or seems like it might never be included, the user may broadcast a new one with Replace-by-fee. To facilitate users’ choice, every block proposer may also signal the list of tokens that will be accepted according to a selection dictated by purely free-market logic. This freedom also improves scalability since there will be far fewer transactions made with the only purpose of providing “gas” to a wallet, which implies higher transaction costs and pollution for the network (UTXO dust). 
 
-### Roles
-
-- Users
-- Node operators
-- Block signers
-- Block proposers
-
 ## Specification
 
 Users will be able to specify the asset used to pay fees when constructing a transaction. If left unspecified, the wallet will default to the asset being sent in the transaction. 
@@ -25,17 +18,18 @@ Node operators will be able to assign weight values to issued assets on the netw
 
 To assist wallets with fee asset selection, nodes will expose their current valuations with a new RPC named `getfeeexchangerates`. The input of `setfeeexchangerates` and the output of `getfeeexchangerates` will both have the same schema. Additionally, node operators will be able to statically configure their exchange rates using a JSON config file which also will use the same schema.
 
-For the initial prototype, the schema will simply be a key value map, where the keys are the asset identifiers and the values are the weight value. An asset identifier can either be the hex id or a label specified by the user using Element's `assetdir` parameter. The weight value is a 64-bit integer[^1] that will be scaled by a factor of one billion to enable high precision without resorting to floating point numbers.
+For the initial prototype, the schema will simply be a key value map, where the keys are the asset identifiers and the values are the weight value. An asset identifier can either be the hex id or a label specified by the user using Element's `assetdir` parameter. The weight value is a 64-bit integer[^1] that will be divided by one billion to enable high-enough precision without resorting to floating point numbers.
 
-Example:
-
+Here is an example config file that valuates `USDt`, a wrapped Bitcoin `S-BTC`, and an unlabelled asset:
 ```json
 { 
-      "S-BTC": 1000000000,
-      "USDt": 100000000,
-      "33244cc19dd9df0fd901e27246e3413c8f6a560451e2f3721fb6f636791087c7": 90045
+      "S-BTC": 5,
+      "USDt": 10,
+      "33244cc19dd9df0fd901e27246e3413c8f6a560451e2f3721fb6f636791087c7": 3
 }
 ```
+
+All of the weight values are translated into an abstract reference unit so they can be directly compared by the node's mempool. In the future, we might want to extend this schema to allow an explicit reference unit, as well as per-asset denominations to handle a wider breadth of asset valuations.
 
 [^1]: See section on [overflow protections](#overflow-protection) for how this interacts with max total number of coins enforced by consensus code.
 
@@ -45,7 +39,7 @@ The No Coin feature will be implemented as an extension to the Elements blockcha
 
 Elements also uses a federation of block signers as a low-cost alternative to proof-of-work mining process. This interacts positively with No Coin since it increases the predictability of whether a transaction will be accepted in a given block. Wallets can use the block signer's published exchange rates to perform fee estimations, and can infer the schedule of block proposers based on the deterministic round robin algorithm used to select the next proposer.
 
-All this being said, Elements enforces that transaction fees are paid in what it refers to as the policy asset, which in most cases is a pegged Bitcoin asset. Consequently, No Coins requires that this restriction be removed, which will require a number of changes to the core code.
+All this being said, Elements enforces that transaction fees are paid in what it refers to as the policy asset, which in most cases is a pegged Bitcoin asset. Consequently, No Coins requires that this restriction be removed, which will require a number of changes to policy code. Consensus, however, will remain unchanged.
 
 ### Transaction
 
@@ -88,15 +82,25 @@ The objective here is not to prescribe a single solution for all use cases, but 
 
 ### Exchange rate RPCs
 
-TODO
+In simplest terms, the exchange RPCs provide a read and write interface to the node's exchange rate map. `getfeeexchangerates` returns the entire exchange rate map, and `setfeeeexchangerates` overrides the current exchange rate map with whatever is provided as its inputs. Note that there is no union between the old and new exchange rate map: the new map completely overrides the current.
+
+Example usage with the same data as the config file shown previously:
+```bash
+$ sequentia-cli setfeeexchangerates '{ "S-BTC": 5, "USDt": 10, "33244cc19dd9df0fd901e27246e3413c8f6a560451e2f3721fb6f636791087c7": 3 }'
+
+$ sequentia-cli getfeeexchangerates
+{ 
+      "S-BTC": 5,
+      "USDt": 10,
+      "33244cc19dd9df0fd901e27246e3413c8f6a560451e2f3721fb6f636791087c7": 3
+}
+```
 
 ### Changes to existing RPCs
 
 Of course, none of these features are meaningful without being exposed in some way to network participants. To that end, we will be extending the existing RPCs to enable specifying which asset fees are paid with, and change defaults to be consistent with this new capability.
 
-Broadly speaking, there are two categories of RPCs that need to be changed: RPCs which create and/or modify transaction fees, and read-only RPCs that provide information about those fees. The former represent the bulk of the work, and the latter should be comparatively straightforward as it will just be a matter of plucking new information from existing data.
-
-In the former category are:
+Broadly speaking, there are two categories of RPCs that need to be changed: RPCs which create and/or modify transaction fees, and read-only RPCs that provide information about those fees.
 
 | Category | Name | Changes |
 | -------- | ---- | ------- |
@@ -113,10 +117,6 @@ And in the latter:
 
 TODO: Add remaining RPCs
 
-## Examples
-
-TODO: Embed video demo?
-
 ## Appendix
 
 ### Chain parameters
@@ -124,5 +124,9 @@ TODO: Embed video demo?
 ### Bootstrapping
 
 ### Overflow protection
+
+Bitcoin and after it Elements uses a CAmount (uint64_t) for adding up fees (in sat) and computing fee rates (in sat/kvB). With a total amount MAX_MONEY a max total number of coins 2.1e15 (<2^51), so there can't be overflow when adding fewer than 8784 numbers.
+
+In particular, that means that when issuing a USD-indexed token, you'll probably want fewer than 10⁸ subdivisions as with BTC and satoshis, or you'll be limited to 21 million dollars total. Maybe only 10² subdivisions (cents) and then the limit is a relatively comfortable 21 trillion (which should last a few decades despite the current exponential inflation). Similarly for all currencies (for VES and similar shitcoins, have 10^-4 "subdivisions" or such). That gives them all assets a common range of utility so the exchange rates should stay within range of what makes sense with a divisor of 10^9 (and actually, with three extra decimals of precision possible considering the MAX_MONEY constraint).
 
 ### Interaction with confidential transactions
