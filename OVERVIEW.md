@@ -31,8 +31,6 @@ Here is an example config file that valuates `USDt`, a wrapped Bitcoin `S-BTC`, 
 
 All of the weight values are translated into an abstract reference unit so they can be directly compared by the node's mempool. In the future, we might want to extend this schema to allow an explicit reference unit, as well as per-asset denominations to handle a wider breadth of asset valuations.
 
-[^1]: See section on [overflow protections](#overflow-protection) for how this interacts with max total number of coins enforced by consensus code.
-
 ## Implementation
 
 The No Coin feature will be implemented as an extension to the Elements blockchain platform, which is itself an extension of Bitcoin. The most relevant feature that Elements adds to Bitcoin is asset issuance, which enables new types of assets to be issued and transferred between network participants. 
@@ -61,8 +59,6 @@ It also must separate the fee value from the fee amount. This is where structura
 `nFeeAsset` is the asset used to pay the transaction fees, and `nFeeAmount` is the amount paid in said asset. `nFee` is insufficient on its own because it needs to be updated whenever the exchange rates change using the `setfeeexchangerates` RPC. When this happens, the fees of all transactions currently in the mempool must be recomputed. Since transactions can sit in a mempool indefinitely, it's important that transactions with depreciated fee assets are evicted. Likewise, transactions with appreciating fee assets should be bumped in priority in order to maximize the value of fee rewards to block proposers.
 
 Recomputing fees is non-trivial because transactions are weighted by not only their own value but also by their ancestors and descendents. Fortunately, there is a similar functionality already in place for prioritizing transactions based on off-chain payments, so the solution will end up looking very similar to the `CtxMemPool:PrioritiseTransaction` method defined at [src/txmempool.cpp#L1003-L1031](https://github.com/ElementsProject/elements/blob/2d298f7e3f76bc6c19d9550af4fd1ef48cf0b2a6/src/txmempool.cpp#L1003-L1031).
-
-[^2]: In `CtxMempoolEntry`, the fee asset and amount can be retrieved from the transaction reference, so both of these values are effectively a cache to avoid expensive parent transaction lookups. The performance impact has not been measured, but since Bitcoin and Elements both cache `nFee`, it seemed rational to follow suit and cache these values as well.
 
 ### Price server
 
@@ -127,6 +123,12 @@ TODO: Add remaining RPCs
 
 Bitcoin and after it Elements uses a CAmount (uint64_t) for adding up fees (in sat) and computing fee rates (in sat/kvB). With a total amount MAX_MONEY a max total number of coins 2.1e15 (<2^51), so there can't be overflow when adding fewer than 8784 numbers.
 
-In particular, that means that when issuing a USD-indexed token, you'll probably want fewer than 10⁸ subdivisions as with BTC and satoshis, or you'll be limited to 21 million dollars total. Maybe only 10² subdivisions (cents) and then the limit is a relatively comfortable 21 trillion (which should last a few decades despite the current exponential inflation). Similarly for all currencies (for VES and similar shitcoins, have 10^-4 "subdivisions" or such). That gives them all assets a common range of utility so the exchange rates should stay within range of what makes sense with a divisor of 10^9 (and actually, with three extra decimals of precision possible considering the MAX_MONEY constraint).
+### Asset denominations
+
+When issuing a USD-indexed token, you'll probably want fewer than 10⁸ subdivisions as with BTC and satoshis, or you'll be limited to 21 million dollars total. Maybe only 10² subdivisions (cents) and then the limit is a relatively comfortable 21 trillion (which should last a few decades despite the current exponential inflation). Similarly for all currencies (for VES and similar shitcoins, have 10^-4 "subdivisions" or such). That gives them all assets a common range of utility so the exchange rates should stay within range of what makes sense with a divisor of 10^9 (and actually, with three extra decimals of precision possible considering the MAX_MONEY constraint).
 
 ### Interaction with confidential transactions
+
+[^1]: See section on [overflow protections](#overflow-protection) for how this interacts with max total number of coins enforced by consensus code.
+
+[^2]: In `CtxMempoolEntry`, the fee asset and amount can be retrieved from the transaction reference, so both of these values are effectively a cache to avoid expensive parent transaction lookups. The performance impact has not been measured, but since Bitcoin and Elements both cache `nFee`, it seemed rational to follow suit and cache these values as well.
