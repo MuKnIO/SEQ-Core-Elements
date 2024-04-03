@@ -78,7 +78,7 @@ The objective here is not to prescribe a single solution for all use cases, but 
 
 ### Exchange rate RPCs
 
-The exchange RPCs will provide a read and write interface to the node's exchange rate map used for comparing fees. `getfeeexchangerates` returns the entire exchange rate map, and `setfeeeexchangerates` overrides the current exchange rate map with whatever is provided as its inputs. Note that there is no union between the old and new exchange rate map: the new map completely overrides the current.
+The exchange RPCs will provide a read and write interface to the node's exchange rate map used for comparing fees. `getfeeexchangerates` returns the entire exchange rate map, and `setfeeeexchangerates` overrides the current exchange rate map with whatever is provided as its inputs. Note that there is no union between the current and new exchange rate map: the new map completely overrides the current.
 
 | Category | Name | Changes |
 | -------- | ---- | ------- |
