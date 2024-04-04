@@ -108,7 +108,8 @@ The former category includes:
 | Category | Name | Changes |
 | -------- | ---- | ------- |
 | `rawtransactions` | `createrawtransaction` | Add `fee_asset` field to specify the asset used for fee payment |
-| `rawtransactions` | `fundrawtransaction` | Add `fee_asset` field to specify the asset used for fee payment |
+| `rawtransactions` | `fundrawtransaction` | Reinterpret or rename `fee_rate` and `feeRate` to be in fee asset and in fee value unit respectively. Add `fee_asset` field to specify the fee asset. In the result, make `fee` denominated in the fee asset, add a `fee_asset` field, then add a `fee_value` for the value as interpreted by the node. |
+| `wallet` | `walletcreatefundedpsbt` | Reinterpret or rename `fee_rate` and `feeRate` to be in fee asset and in fee value unit respectively. Add `fee_asset` field to specify the fee asset. In the result, make `fee` denominated in the fee asset, add a `fee_asset` field, then add a `fee_value` for the value as interpreted by the node. | 
 | `wallet` | `sendtoaddress` | Add `fee_asset` field to specify the asset used for fee payment, otherwise default to the asset being sent in the transaction |
 | `wallet` | `sendmany` | Add `fee_asset` field to specify the asset used for fee payment, otherwise default to the asset being sent in the transaction |
 | `wallet` | `settxfee` | Add optional “fee_asset” parameter, defaulting to the asset being sent in the transaction |
@@ -120,31 +121,30 @@ And the latter:
 | `blockchain` | `getblock` | Add a `fee_details` field that is a breakdown of fees per fee asset (map from fee_asset tag to fee_amount CAmount, e.g. `{"wbtc":"123","wusd":"456"}`, except with nAsset tags rather than symbolic names) | 
 | `blockchain` | `getblockstats` | Make all the sums, totals, averages, etc., denominated in fee value unit, and only available if the rates have been recorded or otherwise provided. For totals, add a field `fee_details` with breakdown per fee asset. |
 | `blockchain` | `getmempoolinfo` | The `total_fee`, `mempoolinfee`, `minrelaytxfee` fields will be denominated in the implicit fee value unit as defined by the node's current exchange rates. | 
-| `blockchain` | `getmempoolancestors` | The `fees` sub-element needs an additional `fee_asset` field | 
-| `blockchain` | `getmempooldescendents` | The `fees` sub-element needs an additional `fee_asset` field | 
-| `blockchain` | `getmempoolentry` | The `fees` sub-element needs an additional `fee_asset` field | 
-| `blockchain` | `getrawmempool` | The `fees` sub-element needs an additional `fee_asset` field |
-| `blockchain` | `savemempool` | The `fees` sub-element needs an additional `fee_asset` field | 
+| `blockchain` | `getmempoolancestors` | The `fees` sub-element in the result needs an additional `fee_asset` field | 
+| `blockchain` | `getmempooldescendents` | The `fees` sub-element in the result needs an additional `fee_asset` field | 
+| `blockchain` | `getmempoolentry` | The `fees` sub-element  in the result needs an additional `fee_asset` field | 
+| `blockchain` | `getrawmempool` | The `fees` sub-element in the result needs an additional `fee_asset` field |
+| `blockchain` | `savemempool` | The `fees` sub-element in the result needs an additional `fee_asset` field | 
 | `blockchain` | `gettxoutsetinfo` | Add field `unclaimed_rewards_details` with a breakdown by fee asset | 
-| `mining` | `getblocktemplate` | TODO | 
-| `mining` | `prioritisetransaction` | TODO | 
-| `network` | `getpeerinfo` | TODO | 
-| `rawtransactions` | `analyzepsbt` | TODO | 
-| `rawtransactions` | `decodepsbt` | Add `fee_asset` field to specify the asset used for fee payment | 
-| `rawtransactions` | `testmempoolaccept` | TODO | 
-| `util` | `estimatesmartfee` | TODO | 
+| `mining` | `getblocktemplate` | In the result, make `fee` denominated in the fee asset, add a `fee_asset` field, then add a `fee_value` for the value as interpreted by the node. | 
+| `mining` | `prioritisetransaction` | Add an optional fourth parameter, only valid if the dummy parameter is present, that specifies the `fee_asset` used for the prioritization. If absent, assume the node's fee value unit. | 
+| `rawtransactions` | `analyzepsbt` | Add `fee_asset` field in result to specify the asset used for fee payment | 
+| `rawtransactions` | `decodepsbt` | Add `fee_asset` field in result to specify the asset used for fee payment | 
+| `rawtransactions` | `testmempoolaccept` | Add  | 
+| `util` | `estimatesmartfee` |  Add an optional parameter for the `fee_asset`, defaulting to the fee value unit for the node, and use it for the estimate. In the result, add a `fee_asset` field. | 
 | `wallet` | `bumpfee` | Add an options field for the `fee_asset`, defaulting to the same fee asset as the existing transaction, and return `fee_asset` field with the same value | 
 | `wallet` | `psbtbumpfee` | Add an options field for the `fee_asset`, defaulting to the same fee asset as the existing transaction, and return `fee_asset` field with the same value |  
 | `wallet` | `gettransaction` | Add a `fee_asset` field in the result, and in each of the details |
-| `wallet` | `getwalletinfo` | TODO |
 | `wallet` | `listsinceblock` | In each of the returned transactions, add a `fee_asset` field |
 | `wallet` | `listtransactions` | In each of the returned transactions, add a `fee_asset` field |
-| `wallet` | `walletcreatefundedpsbt` | TODO | 
 
 There are also a few RPCs where only the documentation needs to be updated:
 
 | Category | Name | Changes |
+| `network` | `getpeerinfo` | Declare `minfeefilter` field as being in the node's fee value unit | 
 | `wallet` | `getbalances` | Document support for multiple assets |
+| `wallet` | `getwalletinfo` | Declare `getwallet` field as being in the node's fee value unit |
 | `wallet` | `listunspent` | Declare `ancestorfees` as being in the node's fee value unit | 
 
 ## Appendix
