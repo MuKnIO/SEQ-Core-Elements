@@ -154,6 +154,10 @@ There are also a few RPCs where only the documentation needs to be updated:
 
 ### Bootstrapping
 
+A sidechain with no native asset means that no assets are generated in the genesis block and there is no block subsidy for block signers. However, there still needs to be a way for network participants to issue assets, which require UTXOs as inputs for entropy and commitment. A more invasive protocol change might be possible that could remove the requirement for inputs during asset issuance, but we don't consider this worthwhile for the purposes of No Coin.  
+
+To that end, we will be creating an asset named GENESIS to bootstrap asset creation on the network. There will be no hardcoding of GENESIS as the asset required for asset issuance, however, so as soon as other assets populate the network they can be used instead. GENESIS tokens will most likely remain indefinitely as collectibles or burnt after some to be determined block height.
+
 ### Overflow protection
 
 Bitcoin and after it Elements uses a CAmount (uint64_t) for adding up fees (in sat) and computing fee rates (in sat/kvB). With a total amount MAX_MONEY a max total number of coins 2.1e15 (<2^51), so there can't be overflow when adding fewer than 8784 numbers.
