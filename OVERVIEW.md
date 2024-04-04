@@ -142,6 +142,7 @@ And the latter:
 There are also a few RPCs where only the documentation needs to be updated:
 
 | Category | Name | Changes |
+| -------- | ---- | ------- |
 | `network` | `getpeerinfo` | Declare `minfeefilter` field as being in the node's fee value unit | 
 | `wallet` | `getbalances` | Document support for multiple assets |
 | `wallet` | `getwalletinfo` | Declare `getwallet` field as being in the node's fee value unit |
