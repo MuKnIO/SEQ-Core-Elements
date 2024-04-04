@@ -90,10 +90,10 @@ Example usage, with the same data as the config file shown previously:
 $ sequentia-cli setfeeexchangerates '{ "S-BTC": 5, "USDt": 10, "33244cc19dd9df0fd901e27246e3413c8f6a560451e2f3721fb6f636791087c7": 3 }'
 
 $ sequentia-cli getfeeexchangerates
-{ 
-      "S-BTC": 5,
-      "USDt": 10,
-      "33244cc19dd9df0fd901e27246e3413c8f6a560451e2f3721fb6f636791087c7": 3
+{
+  "S-BTC": 5,
+  "USDt": 10,
+  "33244cc19dd9df0fd901e27246e3413c8f6a560451e2f3721fb6f636791087c7": 3
 }
 ```
 
