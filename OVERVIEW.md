@@ -97,6 +97,15 @@ $ sequentia-cli getfeeexchangerates
 }
 ```
 
+### Chain parameters
+
+To enable the No Coin feature, two additional chain parameters will be added. They can be configured using command line arguments passed to the node daemon at startup. The arguments are defined as follows:
+
+| Name | Type | Purpose |
+| -------- | ---- | ------- |
+| `con_any_asset_fees` | BOOL | Global flag for enabling the No Coin feature |
+| `exchangeratesjsonfile` | STR | File path to JSON file for configuring the fee exchange rate map | 
+
 ### Changes to existing RPCs
 
 Of course, none of these features are meaningful without being exposed in some way to network participants. To that end, we will be extending the existing RPCs to enable specifying which asset fees are paid with, and change defaults to be consistent with this new capability.
@@ -149,8 +158,6 @@ There are also a few RPCs where only the documentation needs to be updated:
 | `wallet` | `listunspent` | Declare `ancestorfees` as being in the node's fee value unit | 
 
 ## Appendix
-
-### Chain parameters
 
 ### Bootstrapping
 
